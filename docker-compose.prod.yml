@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  marketplace-backend:
+    image: ghcr.io/${GITHUB_REPOSITORY:-your-username/marketplace}/backend:latest
+    container_name: marketplace-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://marketplace_user:marketplace_pass@marketplace-db:5432/marketplace_db
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-here-change-in-production}
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=30
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-sk_test_your_stripe_test_key}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY:-pk_test_your_stripe_test_key}
+    volumes:
+      - ./alembic:/app/alembic
+    depends_on:
+      - marketplace-db
+    networks:
+      - web
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  marketplace-frontend:
+    image: ghcr.io/${GITHUB_REPOSITORY:-your-username/marketplace}/frontend:latest
+    container_name: marketplace-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - marketplace-backend
+    networks:
+      - web
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  marketplace-db:
+    image: postgres:15-alpine
+    container_name: marketplace-db
+    environment:
+      - POSTGRES_DB=marketplace_db
+      - POSTGRES_USER=marketplace_user
+      - POSTGRES_PASSWORD=marketplace_pass
+    volumes:
+      - marketplace_data:/var/lib/postgresql/data
+    networks:
+      - web
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U marketplace_user -d marketplace_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  web:
+    driver: bridge
+
+volumes:
+  marketplace_data:

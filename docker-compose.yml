@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  marketplace-backend:
+    build: .
+    container_name: marketplace-backend
+    ports:
+      - "8002:8000"
+    environment:
+      - DATABASE_URL=postgresql://marketplace_user:marketplace_pass@marketplace-db:5432/marketplace_db
+      - SECRET_KEY=your-secret-key-here-change-in-production
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=30
+      - STRIPE_SECRET_KEY=sk_test_your_stripe_test_key
+      - STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_test_key
+    volumes:
+      - ./alembic:/app/alembic
+    depends_on:
+      - marketplace-db
+    networks:
+      - web
+    restart: unless-stopped
+
+  marketplace-frontend:
+    build: ./frontend
+    container_name: marketplace-frontend
+    ports:
+      - "3002:80"
+    depends_on:
+      - marketplace-backend
+    networks:
+      - web
+    restart: unless-stopped
+
+  marketplace-db:
+    image: postgres:15-alpine
+    container_name: marketplace-db
+    environment:
+      - POSTGRES_DB=marketplace_db
+      - POSTGRES_USER=marketplace_user
+      - POSTGRES_PASSWORD=marketplace_pass
+    volumes:
+      - marketplace_data:/var/lib/postgresql/data
+    networks:
+      - web
+    restart: unless-stopped
+
+networks:
+  web:
+    external: true
+
+volumes:
+  marketplace_data:
