@@ -324,11 +324,18 @@ npm run dev
 - **Dependencies** - Clear and reinstall packages
 - **Environment** - Verify .env configuration
 
+### **502 Bad Gateway Errors**
+If you encounter 502 errors when accessing the marketplace API:
+- **Check**: [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) for detailed solutions
+- **Common cause**: Caddy reverse proxy cannot connect to backend
+- **Quick fix**: Update Caddyfile to use host IP instead of localhost
+
 ### **Getting Help**
 - **API Documentation**: http://localhost:8000/docs
 - **Frontend README**: frontend/README.md
 - **Backend README**: README.md
 - **Project Structure**: PROJECT_STRUCTURE.md
+- **Troubleshooting**: [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
 
 ## 🎯 Next Steps
 
