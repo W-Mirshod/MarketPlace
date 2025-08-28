@@ -4,6 +4,7 @@ import { useQuery } from 'react-query';
 import { useAuthStore } from './stores/authStore';
 import { getCurrentUser } from './lib/api';
 import { UserRole } from './types';
+import { useMetaTags } from './hooks/useMetaTags';
 
 // Components
 import Layout from './components/Layout';
@@ -21,6 +22,9 @@ import ProfilePage from './pages/ProfilePage';
 
 function App() {
   const { user, token, setUser, setToken, isAuthenticated } = useAuthStore();
+  
+  // Initialize meta tags for Telegram previews
+  useMetaTags();
 
   // Check if user is authenticated on app load
   const { isLoading } = useQuery(
